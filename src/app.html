@@ -23,7 +23,7 @@
             <span>Past Orders</span>
           </a>
         </nav>
-        <a href="#" class="top-bar-cart-link">
+        <a class="top-bar-cart-link" @click="showCart">
           <i class="icofont-cart-alt icofont-1x"></i>
           <span>Cart (0)</span>
         </a>
@@ -109,13 +109,13 @@
                     <label>Quantity:</label>
                   </div>
                   <div class="cell">
-                    <input type="number" v-model="inventory.pineapples">
+                    <input type="number" v-model.number="inventory.pineapples">
                   </div>
                 </div>
               </form>
             </div>
             <div class="card-footer">
-              <button class="btn btn-light">Add to cart</button>
+              <button class="btn btn-light" @click="addToCart('pineapples')">Add to cart</button>
             </div>
           </div>
 
@@ -147,13 +147,13 @@
                     <label>Quantity:</label>
                   </div>
                   <div class="cell">
-                    <input type="number" v-model="inventory.cherries">
+                    <input type="number" v-model.number="inventory.cherries">
                   </div>
                 </div>
               </form>
             </div>
             <div class="card-footer">
-              <button class="btn btn-light">Add to cart</button>
+              <button class="btn btn-light" @click="addToCart('cherries')">Add to cart</button>
             </div>
           </div>
 
@@ -161,8 +161,12 @@
 
       </main>
 
+      
+
       <footer>
       </footer>
+
+      <sidebar v-if="isCartVisible" :toggle="showCart" :cart="cart"/>
 
     </div>
       
@@ -171,6 +175,7 @@
       let app = Vue.createApp({
         data() {
           return {
+            isCartVisible: false,
             inventory: {
               carrots: 0,
               pineapples: 0,
@@ -186,9 +191,79 @@
         methods: {
           addToCart(type) {
             this.cart[type] += this.inventory[type]
+            this.inventory[type] = 0
             console.log(this.cart)
+          },
+          showCart() {
+            this.isCartVisible = !this.isCartVisible;
           }
         }
+      })
+
+      app.component("sidebar", {
+        template: `
+            <aside class="cart-container">
+            <div class="cart">
+              <h1 class="cart-title spread">
+                <span>
+                  Cart
+                  <i class="icofont-cart-alt icofont-1x"></i>
+                </span>
+                <button class="cart-close" @click="toggle" >&times;</button>
+              </h1>
+
+              <div class="cart-body">
+                <table class="cart-table">
+                  <thead>
+                    <tr>
+                      <th><span class="sr-only">Product Image</span></th>
+                      <th>Product</th>
+                      <th>Price</th>
+                      <th>Qty</th>
+                      <th>Total</th>
+                      <th><span class="sr-only">Actions</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><i class="icofont-carrot icofont-3x"></i></td>
+                      <td>Carrot</td>
+                      <td>$1.0</td>
+                      <td class="center">{{ cart.carrots }}</td>
+                      <td>\${{ cart.carrots * 4.82 }}</td>
+                      <td class="center">
+                        <button class="btn btn-light cart-remove">
+                          &times;
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <p class="center"><em>No items in cart</em></p>
+                <div class="spread">
+                  <span><strong>Total:</strong>{{ cartTotal }}</span>
+                  <button class="btn btn-light">Checkout</button>
+                </div>
+              </div>
+            </div>
+          </aside>
+        `,
+
+        data() {
+          return {
+            
+          }
+        },
+
+        computed: {
+          cartTotal() {
+            return (this.cart.carrots * 4.82).toFixed(2);
+          }
+          
+        },
+
+       props: ["toggle", "cart"]
       })
 
       app.mount('#app')
